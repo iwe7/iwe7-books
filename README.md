@@ -12,6 +12,6 @@ import { BooksModule } from "iwe7-books";
 })
 ```
 
-```ts
+```html
 <app-books [modules]="modules"></app-books>
 ```
