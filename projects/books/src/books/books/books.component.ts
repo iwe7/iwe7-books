@@ -41,6 +41,7 @@ export class BooksComponent implements OnInit, OnChanges {
   @Input() modules: Type<any>[] = [];
   list: any[] = [];
   listMap: Map<string, any> = new Map();
+
   @ViewChild("container") view: ElementRef;
 
   listMap$: Subject<any> = new Subject();
@@ -99,10 +100,9 @@ export class BooksComponent implements OnInit, OnChanges {
                 switchMap(res =>
                   from(res).pipe(
                     filter(res => !!res),
-                    map((res: any) => res.decorators),
-                    filter(res => !!res),
-                    switchMap(res =>
-                      from(res).pipe(
+                    switchMap((res: any) => {
+                      let { name, propDecorators } = res;
+                      return from(res.decorators).pipe(
                         filter(res => !!res),
                         map((res: any) => res.args),
                         filter(res => !!res),
@@ -110,6 +110,8 @@ export class BooksComponent implements OnInit, OnChanges {
                           return from(res).pipe(
                             switchMap((res: any) => {
                               if (res && res.selector) {
+                                res.name = name;
+                                res.props = this.converProps(propDecorators);
                                 return of(res);
                               } else {
                                 return this.conver(res);
@@ -117,8 +119,8 @@ export class BooksComponent implements OnInit, OnChanges {
                             })
                           );
                         })
-                      )
-                    )
+                      );
+                    })
                   )
                 )
               )
@@ -126,7 +128,7 @@ export class BooksComponent implements OnInit, OnChanges {
           )
         ),
         map((res: any) => {
-          this.listMap.set(res.selector, res);
+          this.listMap.set(res.name, res);
           return this.listMap;
         })
       )
@@ -139,19 +141,55 @@ export class BooksComponent implements OnInit, OnChanges {
       );
   }
 
+  converProps(props: any) {
+    if (props) {
+      let res = {};
+      for (let key in props) {
+        let value = [];
+        props[key].map(res => {
+          let args = res.args;
+          if (args) {
+            args.map(arg => {
+              if ({}.toString.call(arg) === "[object String]") {
+                value.push(arg);
+              } else if ({}.toString.call(arg) === "[object Function]") {
+                value.push(arg.name);
+              } else {
+                let { read } = arg;
+                if (read) {
+                  value.push(read.name);
+                } else {
+                  value.push('')
+                }
+              }
+            });
+          } else {
+            value.push("");
+          }
+        });
+        res[key] = value;
+      }
+      return res;
+    } else {
+      return {};
+    }
+  }
+
   conver(res: any) {
     return of(res).pipe(
       map(res => res.exports),
       switchMap(res => {
         return from(res).pipe(
-          map((res: any) => res.decorators),
-          switchMap(res => {
-            return from(res).pipe(
+          switchMap((res: any) => {
+            let { name, propDecorators } = res;
+            return from(res.decorators).pipe(
               map((res: any) => res.args),
               switchMap(res =>
                 from(res).pipe(
                   switchMap((res: any) => {
                     if (res && res.selector) {
+                      res.name = name;
+                      res.props = this.converProps(propDecorators);
                       return of(res);
                     } else {
                       return this.conver(res);
