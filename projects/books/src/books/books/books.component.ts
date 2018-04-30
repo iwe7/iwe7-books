@@ -74,6 +74,7 @@ export class BooksComponent implements OnInit, OnChanges {
     const componentFactories: ComponentFactory<any>[] =
       moduleWithComponentFactories.componentFactories;
     const obsers: any[] = [];
+    console.log(componentFactories);
     componentFactories.map((componentFactory: ComponentFactory<any>) => {
       const element: NgElementConstructor<any> = createCustomElement(
         componentFactory.componentType,
@@ -93,7 +94,7 @@ export class BooksComponent implements OnInit, OnChanges {
         name: componentFactory.selector,
         inputs: componentFactory.inputs,
         outputs: componentFactory.outputs,
-        content: componentFactory.ngContentSelectors
+        contents: componentFactory.ngContentSelectors
       });
     });
     // list
@@ -103,7 +104,7 @@ export class BooksComponent implements OnInit, OnChanges {
       }
     });
   }
-
+  insertElement: any;
   createElement(selector: string) {
     const item = elementMap.get(selector);
     if (!item) {

@@ -1,14 +1,26 @@
-<ul class="nav">
-  <li [class.active]="active === 'inputs'" (click)="onNav('inputs')">inputs</li>
-  <li [class.active]="active === 'outputs'" (click)="onNav('outputs')">outputs</li>
-</ul>
-
-<ul class="content" [formGroup]="form">
-  <li *ngFor="let item of list">
-    {{item.propName}}
-    <input *ngIf="active === 'inputs'" [formControlName]="item.propName" type="text">
-  </li>
-</ul>
-<div>
-  {{json}}
+<div class="view">
+  <h2 class="title">inputs</h2>
+  <ul class="content" [formGroup]="form">
+    <li *ngFor="let con of item?.inputs">
+      {{con.propName}}
+      <input [formControlName]="con.propName" type="text">
+    </li>
+  </ul>
+</div>
+<div class="view">
+  <h2 class="title">contents</h2>
+  <ul class="content">
+    <li *ngFor="let con of item?.contents">
+      {{con}}
+    </li>
+  </ul>
+</div>
+<div class="view">
+  <h2 class="title">outputs</h2>
+  <ul class="content">
+    <li *ngFor="let con of item?.outputs">{{con.propName}}</li>
+  </ul>
+  <div>
+    {{json}}
+  </div>
 </div>

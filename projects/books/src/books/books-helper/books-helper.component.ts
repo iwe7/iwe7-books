@@ -56,11 +56,16 @@ export class BooksHelperComponent implements OnInit, OnChanges {
         this.createForm();
         this.cd.markForCheck();
       }
-    } else {
+    } else if (this.active === "outputs") {
       if ("outputs" in this.item) {
         this.list = this.item.outputs;
         this.createOutputs();
         this.cd.markForCheck();
+      }
+    } else {
+      if ("contents" in this.item) {
+        this.list = this.item.contents;
+        console.log(this.list);
       }
     }
   }
