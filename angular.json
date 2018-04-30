@@ -131,6 +131,46 @@
           }
         }
       }
+    },
+    "books": {
+      "root": "projects/books",
+      "sourceRoot": "projects/books/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/books/tsconfig.lib.json",
+            "project": "projects/books/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "project": "projects/books/ng-package.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/books/src/test.ts",
+            "tsConfig": "projects/books/tsconfig.spec.json",
+            "karmaConfig": "projects/books/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/books/tsconfig.lib.json",
+              "projects/books/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "defaultProject": "iwe7-components"

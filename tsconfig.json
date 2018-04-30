@@ -19,6 +19,9 @@
     "paths": {
       "antd": [
         "dist/antd"
+      ],
+      "books": [
+        "dist/books"
       ]
     }
   }
