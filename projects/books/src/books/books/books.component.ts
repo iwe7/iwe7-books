@@ -74,7 +74,6 @@ export class BooksComponent implements OnInit, OnChanges {
     const componentFactories: ComponentFactory<any>[] =
       moduleWithComponentFactories.componentFactories;
     const obsers: any[] = [];
-    console.log(componentFactories);
     componentFactories.map((componentFactory: ComponentFactory<any>) => {
       const element: NgElementConstructor<any> = createCustomElement(
         componentFactory.componentType,
