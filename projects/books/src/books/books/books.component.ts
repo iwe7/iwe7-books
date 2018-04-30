@@ -159,7 +159,7 @@ export class BooksComponent implements OnInit, OnChanges {
                 if (read) {
                   value.push(read.name);
                 } else {
-                  value.push('')
+                  value.push("");
                 }
               }
             });

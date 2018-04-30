@@ -1,43 +1,43 @@
 <div class="view">
   <ul class="content" [formGroup]="form">
     <li *ngIf="form.contains('name')">
-      名字:
+      名字(name):
       <textarea rows="1" formControlName="name"></textarea>
     </li>
     <li *ngIf="form.contains('selector')">
-      选择器:
+      选择器(selector):
       <textarea rows="5" formControlName="selector"></textarea>
     </li>
     <li *ngIf="form.contains('exportAs')">
-      导出:
+      导出(exportAs):
       <input type="text" formControlName="exportAs">
     </li>
     <li *ngIf="form.contains('inputs')">
-      输入:
+      输入(inputs):
       <textarea rows="5" formControlName="inputs"></textarea>
     </li>
     <li *ngIf="form.contains('outputs')">
-      输出:
+      输出(outputs):
       <textarea rows="5" formControlName="outputs"></textarea>
     </li>
     <li *ngIf="form.contains('host')">
-      绑定:
+      绑定(host):
       <textarea rows="5" formControlName="host"></textarea>
     </li>
     <li *ngIf="form.contains('template')">
-      模板:
+      模板(template):
       <textarea rows="8" formControlName="template"></textarea>
     </li>
     <li *ngIf="form.contains('styles')">
-      样式:
+      样式(styles):
       <textarea rows="8" formControlName="styles"></textarea>
     </li>
     <li *ngIf="form.contains('animations')">
-      动画:
+      动画(animations):
       <textarea rows="5" formControlName="animations"></textarea>
     </li>
     <li *ngIf="form.contains('props')">
-      props:
+      属性(props):
       <textarea rows="5" formControlName="props"></textarea>
     </li>
   </ul>
