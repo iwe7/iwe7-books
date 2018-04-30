@@ -1,9 +1,10 @@
 :host {
     display: flex;
     flex-direction: column;
-    width: 300px;
+    width: 400px;
     background: #d2d2d2;
     color: #000;
+    overflow: auto;
     .view {
         flex: 1;
     }
@@ -21,40 +22,18 @@ ul.content {
         line-height: 30px;
         flex: 1;
         padding: 0 10px;
+        display: flex;
+        flex-direction: column;
         cursor: pointer;
         user-select: none;
         color: #000;
-        &:hover {
-            color: #fff;
-            background: #333;
+        &:after {
+            display: block;
+            content: " ";
         }
-        &:after{
-          display: block;
-          content: " ";
+        input,
+        textarea {
+            width: 100%;
         }
-    }
-}
-
-ul.contents {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    padding: 0 20px;
-    li {
-        line-height: 30px;
-    }
-}
-
-h2.title {
-    height: 30px;
-    line-height: 30px;
-    text-align: center;
-    font-size: 16px;
-    background: #333;
-    color: #ccc;
-    cursor: pointer;
-    &:hover {
-        color: #fff;
-        background: #222;
     }
 }

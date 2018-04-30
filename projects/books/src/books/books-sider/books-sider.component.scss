@@ -1,21 +1,29 @@
 :host {
     display: flex;
     flex-direction: column;
-    width: 200px;
-    background: #333;
-    color: #ccc;
+    width: 100%;
+    background: #efefef;
+    color: #000;
+    overflow: auto;
     ul {
         list-style: none;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
         li {
-            height: 30px;
+            min-height: 30px;
             cursor: pointer;
             text-align: center;
             line-height: 30px;
             user-select: none;
-            &:hover {
-                opacity: .8;
-                background: #000;
-                color: #fff;
+            button {
+                padding: 5px 10px;
+                margin: 5px;
+                border-radius: 3px;
+                &:hover {
+                    background: #000;
+                    color: #fff;
+                }
             }
         }
     }

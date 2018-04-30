@@ -14,7 +14,16 @@ import {
   ElementRef
 } from "@angular/core";
 import { fromPromise } from "rxjs/observable/fromPromise";
-import { forkJoin } from "rxjs";
+import { forkJoin, from, of, Subject } from "rxjs";
+import {
+  map,
+  tap,
+  switchMap,
+  filter,
+  takeLast,
+  debounceTime
+} from "rxjs/operators";
+
 import { createCustomElement, NgElementConstructor } from "@angular/elements";
 import { element } from "protractor";
 const elementMap: Map<string, HTMLElement> = new Map();
@@ -31,13 +40,22 @@ let timeoutIntervalSpeed;
 export class BooksComponent implements OnInit, OnChanges {
   @Input() modules: Type<any>[] = [];
   list: any[] = [];
-
+  listMap: Map<string, any> = new Map();
   @ViewChild("container") view: ElementRef;
+
+  listMap$: Subject<any> = new Subject();
   constructor(
     public compiler: Compiler,
     public injector: Injector,
     public render: Renderer2
-  ) {}
+  ) {
+    this.listMap$.pipe(debounceTime(300)).subscribe(res => {
+      this.list = [];
+      this.listMap.forEach(res => {
+        this.list.push(res);
+      });
+    });
+  }
 
   ngOnInit() {
     this.modules.map(res => {
@@ -57,106 +75,94 @@ export class BooksComponent implements OnInit, OnChanges {
     }
   }
   activeItem: any;
-  activeInstance: HTMLElement;
   handlerClick(item) {
     this.activeItem = item;
-    this.createElement(item.name);
-    this.activeInstance = elementMap.get(item.name);
   }
 
   getComponents(res: Type<any>) {
     const ngModuleFactory = this.compiler.compileModuleSync(res);
-    const ngModuleRef = ngModuleFactory.create(this.injector);
-    const componentFactoryResolver = ngModuleRef.componentFactoryResolver;
-    const moduleWithComponentFactories = this.compiler.compileModuleAndAllComponentsSync(
-      res
-    );
-    const componentFactories: ComponentFactory<any>[] =
-      moduleWithComponentFactories.componentFactories;
-    const obsers: any[] = [];
-    componentFactories.map((componentFactory: ComponentFactory<any>) => {
-      const element: NgElementConstructor<any> = createCustomElement(
-        componentFactory.componentType,
-        {
-          injector: ngModuleRef.injector
+    of(res)
+      .pipe(
+        map(res => this.compiler.compileModuleSync(res)),
+        filter(res => !!res),
+        map(res => res.moduleType),
+        filter(res => !!res),
+        switchMap((res: any) =>
+          from(res.decorators).pipe(
+            filter(res => !!res),
+            map((res: any) => res.args),
+            filter(res => !!res),
+            switchMap(res =>
+              from(res).pipe(
+                map((res: any) => res.exports),
+                filter(res => !!res),
+                switchMap(res =>
+                  from(res).pipe(
+                    filter(res => !!res),
+                    map((res: any) => res.decorators),
+                    filter(res => !!res),
+                    switchMap(res =>
+                      from(res).pipe(
+                        filter(res => !!res),
+                        map((res: any) => res.args),
+                        filter(res => !!res),
+                        switchMap((res: any) => {
+                          return from(res).pipe(
+                            switchMap((res: any) => {
+                              if (res && res.selector) {
+                                return of(res);
+                              } else {
+                                return this.conver(res);
+                              }
+                            })
+                          );
+                        })
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+        map((res: any) => {
+          this.listMap.set(res.selector, res);
+          return this.listMap;
+        })
+      )
+      .subscribe(
+        res => {},
+        () => {},
+        () => {
+          this.listMap$.next(this.listMap);
         }
       );
-      customElements.define(componentFactory.selector, element);
-      obsers.push(
-        fromPromise(
-          customElements.whenDefined(componentFactory.selector).then(() => {
-            return componentFactory.selector;
+  }
+
+  conver(res: any) {
+    return of(res).pipe(
+      map(res => res.exports),
+      switchMap(res => {
+        return from(res).pipe(
+          map((res: any) => res.decorators),
+          switchMap(res => {
+            return from(res).pipe(
+              map((res: any) => res.args),
+              switchMap(res =>
+                from(res).pipe(
+                  switchMap((res: any) => {
+                    if (res && res.selector) {
+                      return of(res);
+                    } else {
+                      return this.conver(res);
+                    }
+                  })
+                )
+              )
+            );
           })
-        )
-      );
-      this.list.push({
-        name: componentFactory.selector,
-        inputs: componentFactory.inputs,
-        outputs: componentFactory.outputs,
-        contents: componentFactory.ngContentSelectors
-      });
-    });
-    // list
-    forkJoin(...obsers).subscribe((res: any) => {
-      if (res.length > 0) {
-        this.createElement(res[0]);
-      }
-    });
-  }
-  insertElement: any;
-  createElement(selector: string) {
-    const item = elementMap.get(selector);
-    if (!item) {
-      const element = document.createElement(selector);
-      this.render.appendChild(this.view.nativeElement, element);
-      element.onmouseover = () => {
-        this.activeInstance = element;
-        const items = this.list.filter(item => {
-          return item.name === selector;
-        });
-        this.activeItem = items[0];
-      };
-      elementMap.set(selector, element);
-    } else {
-      this.ScrollToControl(item);
-    }
-  }
-
-  ScrollToControl(elem) {
-    let scrollPos = this.elementPosition(elem).y;
-    scrollPos = scrollPos - document.documentElement.scrollTop;
-    let remainder = scrollPos % 50;
-    let repeatTimes = (scrollPos - remainder) / 50;
-    this.ScrollSmoothly(scrollPos, repeatTimes);
-    window.scrollBy(0, remainder);
-  }
-
-  ScrollSmoothly(scrollPos, repeatTimes) {
-    if (repeatCount < repeatTimes) {
-      window.scrollBy(0, 50);
-    } else {
-      repeatCount = 0;
-      clearTimeout(cTimeout);
-      return;
-    }
-    repeatCount++;
-    cTimeout = setTimeout(
-      "ScrollSmoothly('" + scrollPos + "','" + repeatTimes + "')",
-      10
+        );
+      })
     );
-  }
-
-  elementPosition(obj) {
-    let curleft = 0,
-      curtop = 0;
-    if (obj.offsetParent) {
-      curleft = obj.offsetLeft;
-      curtop = obj.offsetTop;
-      while ((obj = obj.offsetParent)) {
-        curleft += obj.offsetLeft;
-        curtop += obj.offsetTop;
-      }
-    }
-    return { x: curleft, y: curtop };
   }
 }

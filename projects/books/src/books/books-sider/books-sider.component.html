@@ -1,3 +1,5 @@
 <ul>
-  <li (click)="onClick(item)" *ngFor="let item of list">{{item.name}}</li>
+  <li (click)="onClick(item)" *ngFor="let item of list">
+    <button>{{item.selector}}</button>
+  </li>
 </ul>
